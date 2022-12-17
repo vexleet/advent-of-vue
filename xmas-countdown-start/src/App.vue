@@ -2,7 +2,7 @@
 import CountdownHeader from '@/components/CountdownHeader.vue'
 import CountdownSegment from './components/CountdownSegment.vue'
 import { useNow } from '@vueuse/core'
-import {ref, watch} from "vue";
+import {onMounted, ref, watch} from "vue";
 
 const now = useNow({interval: 1000})
 const christmas = new Date('12/25/2022 00:00:00')
@@ -14,12 +14,12 @@ const time = ref({
   seconds: 0
 })
 
-watch(now, newVal => {
-  const diffTime = Math.abs(newVal.getTime() - christmas.getTime())
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  const diffHours = Math.ceil((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const diffMinutes = Math.ceil((diffTime % (1000 * 60 * 60)) / (1000 * 60));
-  const diffSeconds = Math.ceil((diffTime % (1000 * 60)) / 1000);
+const calculateTime = (currentTime) => {
+  const diffTime = Math.abs(currentTime.getTime() - christmas.getTime())
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+  const diffSeconds = Math.floor((diffTime % (1000 * 60)) / 1000);
 
   time.value = {
     days: diffDays,
@@ -27,8 +27,11 @@ watch(now, newVal => {
     minutes: diffMinutes,
     seconds: diffSeconds
   }
-})
-console.log(now)
+}
+
+onMounted(() => calculateTime(new Date()))
+
+watch(now, newVal => calculateTime(newVal))
 </script>
 <template>
   <div class="w-full h-full flex justify-center items-center p-10">
